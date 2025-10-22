@@ -1,5 +1,10 @@
 const jwt = require("jsonwebtoken");
 
+require('dotenv').config();
+
+
+
+
 module.exports.createAccessToken = (user) => {
 	const data = {
 		id: user._id,
@@ -11,12 +16,14 @@ module.exports.createAccessToken = (user) => {
 };
 
 
-
 module.exports.verify = (req, res, next) => {
 	let token = req.headers.authorization;
 
 	if (typeof token === "undefined") {
-		return res.send({ auth: "Failed. No Token"});
+		return res.status(401).send({ 
+			auth: "Failed",
+			message: "No Authorization Token"
+		});
 	} 
 
 	token = token.slice(7, token.length);
@@ -32,4 +39,16 @@ module.exports.verify = (req, res, next) => {
 		req.user = decodedToken;
 		next();
 	});
+}
+
+
+module.exports.verifyAdmin = (req, res, next) => {
+	if (!req.user.isAdmin) {
+		return res.status(403).send({
+			auth: "Failed",
+			message: "Action Forbidden"
+		});
+	} 
+
+	next();
 }
