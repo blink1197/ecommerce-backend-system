@@ -7,7 +7,7 @@ const { verify, verifyAdmin } = require('../auth');
 const router = express.Router();
 
 
-// Endpoints
+// Register
 router.post("/register", userController.registerUser);
 
 // Login

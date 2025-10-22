@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const userRoutes = require("./routes/user");
+const productRoutes = require("./routes/product");
 const app = express();
 require('dotenv').config();
 
@@ -15,8 +16,9 @@ db.once("open", () => console.log("We're connected to the cloud database"))
 // Middleware
 app.use(express.json());
 
-
+// Endpoints
 app.use("/users", userRoutes);
+app.use("/products", productRoutes);
 
 
 if(require.main === module){
