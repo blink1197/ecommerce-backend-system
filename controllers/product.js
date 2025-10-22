@@ -132,3 +132,70 @@ module.exports.activateProduct = (req, res) => {
 	    });
 }
 
+
+// Search product by name
+module.exports.searchProductByName = (req, res) => {
+	const { name } = req.body;
+
+    if (!name) {
+        return res.status(400).send({ message: 'Course name is required.' });
+    }
+
+    // Use case-insensitive regex to match partial names
+    return Product.find({ name: { $regex: name, $options: 'i' }, isActive: true })
+        .then(products => {
+            if (products.length === 0) {
+                return res.status(404).send({ message: 'No products found.' });
+            }
+
+            return res.status(200).json({
+                success: true,
+                products
+            });
+        })
+        .catch((error) => {
+        	console.error(error);
+	        return res.status(500).json({
+	            error: "Failed in Find",
+	            details: error
+	        });
+	    });
+} 
+
+
+// Search product by price range
+module.exports.searchProductByPriceRange = (req, res) => {
+    const { minPrice, maxPrice } = req.body;
+
+    // Validate inputs
+    if (minPrice == null || maxPrice == null) {
+        return res.status(400).json({
+            message: "Both minPrice and maxPrice are required"
+        });
+    }
+
+    // Find courses within price range
+    return Product.find({
+        price: { $gte: minPrice, $lte: maxPrice },
+        isActive: true
+    })
+    .then(products => {
+        if (products.length === 0) {
+            return res.status(404).json({
+                message: "No products found within this price range"
+            });
+        }
+
+        return res.status(200).json({
+            message: "Products found",
+            products: products
+        });
+    })
+    .catch((error) => {
+    	console.error(error);
+        return res.status(500).json({
+            error: "Failed in Find",
+            details: error
+        });
+    });
+};
