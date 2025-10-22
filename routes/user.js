@@ -10,14 +10,16 @@ const router = express.Router();
 // Endpoints
 router.post("/register", userController.registerUser);
 
-//Login
+// Login
 router.post("/login", userController.loginUser);
 
-//Retrieve User Details
+// Retrieve User Details
 router.get('/details', verify, userController.getUserdetails);
 
-//Set as admin
+// Set user as admin
 router.patch("/:id/set-as-admin", verify, verifyAdmin, userController.updateAdmin);
 
+// Update password
+router.patch("/update-password", verify, userController.updatePassword);
 
 module.exports = router;
