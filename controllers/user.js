@@ -5,7 +5,6 @@ const auth = require('../auth');
 
 // Register User
 module.exports.registerUser = (req, res) => {
-
 	const { firstName, lastName, email, mobileNo, password } = req.body;
 
 	if (!firstName || typeof firstName !== 'string' || !lastName || typeof lastName !== 'string' ) {
@@ -46,7 +45,6 @@ module.exports.registerUser = (req, res) => {
 };
 
 
-
 // Login User
 module.exports.loginUser = async (req, res) => {
     const { email, password } = req.body;
@@ -75,8 +73,15 @@ module.exports.loginUser = async (req, res) => {
 		    });
 
     	})
-    	.catch(error => console.log(error))
+    	.catch((error) => {
+            console.error(error);
+            return res.status(500).json({
+                error: "Failed in Find",
+                details: error
+            });
+        });
 };
+
 
 // Retrieve User Details
 module.exports.getUserdetails = (req, res) => {
@@ -94,45 +99,16 @@ module.exports.getUserdetails = (req, res) => {
 
             return res.status(200).send({ user: userWithoutPassword });
         })
-        .catch(error => console.log(error))
+        .catch((error) => {
+            console.error(error);
+            return res.status(500).json({
+                error: "Failed in Find",
+                details: error
+            });
+        });
 };	
 
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Set user as admin
 module.exports.updateAdmin = (req, res) => {
     const userId = req.params.id;
@@ -170,4 +146,30 @@ module.exports.updateAdmin = (req, res) => {
             });
         });
 };
+
+
+// Update password
+module.exports.updatePassword = (req, res) => {
+    const { newPassword } = req.body;
+    const userId = req.user.id;
+
+    return User.findByIdAndUpdate(userId, { password: bcrypt.hashSync(newPassword, 10)})
+    	.then((user) => {
+    		if (!user) {
+                return res.status(404).json({
+                    error: "User not found"
+                });
+            }
+
+            return res.status(200).send({ message: "Password reset successfully" });
+    	})
+    	.catch((error) => {
+            console.error(error);
+            return res.status(500).json({
+                error: "Failed in Find",
+                details: error
+            });
+        });
+};
+
 
