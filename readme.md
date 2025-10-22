@@ -19,3 +19,12 @@
 - Set user as admin (Admin only)
 - Retrieve User Details
 - Update Password
+
+##### Product Resources:
+- Product Creation
+- Get All Products
+- Get All Active Products
+- Get Product by ID
+- Update Product
+- Archive Product
+- Activate Product
