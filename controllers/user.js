@@ -36,8 +36,15 @@ module.exports.registerUser = (req, res) => {
     .then((user) => res.status(201).send({
         message: 'Registered Successfully',
     }))
-    .catch(error => console.log(error));
+    .catch((error) => {
+        console.error(error);
+        return res.status(500).json({
+            error: "Failed in save",
+            details: error
+        });
+    });
 };
+
 
 
 // Login User
@@ -89,3 +96,78 @@ module.exports.getUserdetails = (req, res) => {
         })
         .catch(error => console.log(error))
 };	
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Set user as admin
+module.exports.updateAdmin = (req, res) => {
+    const userId = req.params.id;
+
+    // Check if user exists
+    return User.findById(userId)
+        .then((user) => {
+            if (!user) {
+                return res.status(404).json({
+                    error: "User not found"
+                });
+            }
+
+            // Check if already admin
+            if (user.isAdmin) {
+                return res.status(200).json({
+                    message: "User is already an admin"
+                });
+            }
+
+            // Update user to admin
+            user.isAdmin = true;
+            return user.save()
+                .then(() => {
+                    return res.status(200).json({
+                        updatedUser: user
+                    });
+                });
+        })
+        .catch((error) => {
+            console.error(error);
+            return res.status(500).json({
+                error: "Failed in Find",
+                details: error
+            });
+        });
+};
+

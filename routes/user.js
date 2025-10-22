@@ -1,6 +1,8 @@
 const express = require('express');
 const userController = require('../controllers/user');
-const { verify } = require('../auth');
+const { verify, verifyAdmin } = require('../auth');
+
+
 
 const router = express.Router();
 
@@ -13,6 +15,9 @@ router.post("/login", userController.loginUser);
 
 //Retrieve User Details
 router.get('/details', verify, userController.getUserdetails);
+
+//Set as admin
+router.patch("/:id/set-as-admin", verify, verifyAdmin, userController.updateAdmin);
 
 
 module.exports = router;
