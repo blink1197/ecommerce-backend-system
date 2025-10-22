@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const userRoutes = require("./routes/user");
 const productRoutes = require("./routes/product");
+const cartRoutes = require("./routes/cart");
 const app = express();
 require('dotenv').config();
 
@@ -19,7 +20,7 @@ app.use(express.json());
 // Endpoints
 app.use("/users", userRoutes);
 app.use("/products", productRoutes);
-
+app.use("/cart", cartRoutes);
 
 if(require.main === module){
     app.listen(process.env.PORT || 3000, () => 
