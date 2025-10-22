@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
+const auth = require('../auth');
 
 
 // Register User
@@ -38,44 +39,53 @@ module.exports.registerUser = (req, res) => {
     .catch(error => console.log(error));
 };
 
-//Login
-module.exports.login = (req, res) => {
+
+// Login User
+module.exports.loginUser = async (req, res) => {
     const { email, password } = req.body;
 
-    
     if (!email || !email.includes("@")) {
         return res.status(400).send({ error: "Invalid Email" });
     }
 
-    
-    const user = await User.findOne({ email });
-    if (!user) {
-        return res.status(404).send({ error: "No Email Found" });
-    }
+    return User.findOne({ email: email })
+    	.then((user) => {
+    		// If no email found
+    		if (!user) {
+		        return res.status(404).send({ error: "No Email Found" });
+		    }
 
-    
-    const isPasswordCorrect = bcrypt.compareSync(password, user.password);
-    if (!isPasswordCorrect) {
-        return res.status(401).send({ error: "Email and password do not match" });
-    }
+		    // If passwords dont match
+		    const isPasswordCorrect = bcrypt.compareSync(password, user.password);
+		    if (!isPasswordCorrect) {
+		        return res.status(401).send({ error: "Email and password do not match" });
+		    }
 
-    
-    const accessToken = auth.createAccessToken(user);
+		    const accessToken = auth.createAccessToken(user);
 
-    return res.status(200).send({
-        access: accessToken
-    });
+		    return res.status(200).send({
+		        access: accessToken
+		    });
+
+    	})
+    	.catch(error => console.log(error))
 };
 
-//Retrieve User Details
-module.exports.details = (req, res) => {
+// Retrieve User Details
+module.exports.getUserdetails = (req, res) => {
     return User.findById(req.user.id)
-        .then(user => {
+        .then((user) => {
             if (!user) {
                 return res.status(403).send({ error: "User not found" });
-            } else {
-                user.password = "";
-                return res.status(200).send(user);
-            }
-        });
-};
+            } 
+
+            // Convert Mongoose document to plain JS object
+            const userWithoutPassword = user.toObject();
+
+            // Remove the password property
+            delete userWithoutPassword.password;
+
+            return res.status(200).send({ user: userWithoutPassword });
+        })
+        .catch(error => console.log(error))
+};	
