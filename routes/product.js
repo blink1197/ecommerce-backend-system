@@ -15,7 +15,7 @@ router.get("/all", verify, verifyAdmin, productController.getAllProduct);
 router.get("/active", productController.getAllActive);
 
 //Get specific product
-router.get("/:productid", productController.getProduct);
+router.get("/:productId", productController.getProduct);
 
 
 module.exports = router;
