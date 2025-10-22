@@ -62,6 +62,7 @@ module.exports.updateProduct = (req, res) => {
 	    });
 }
 
+
 // Archive product
 module.exports.archiveProduct = (req, res) => {
 	const productId = req.params.productId;
@@ -95,3 +96,39 @@ module.exports.archiveProduct = (req, res) => {
 	        });
 	    });
 }
+
+
+// Archive product
+module.exports.activateProduct = (req, res) => {
+	const productId = req.params.productId;
+	let updateActiveField = {
+        isActive: true
+    }
+
+    return Product.findByIdAndUpdate(productId, updateActiveField)
+    	.then((product) => {
+    		if (!product) {
+    			return res.status(404).send({ message: 'Product not found' });
+    		} 
+
+    		if (product.isActive) {
+                return res.status(200).send({ 
+                    message: 'Product already activated',
+                    activateProduct: product
+                });
+            }
+
+            return res.status(200).send({ 
+                success: true, 
+                message: 'Product activated successfully'
+            });
+    	})
+    	.catch((error) => {
+        	console.error(error);
+	        return res.status(500).json({
+	            error: "Failed in Find",
+	            details: error
+	        });
+	    });
+}
+
