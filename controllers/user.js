@@ -35,8 +35,45 @@ module.exports.registerUser = (req, res) => {
     .then((user) => res.status(201).send({
         message: 'Registered Successfully',
     }))
-    .catch(error => console.log(error));
+    .catch((error) => {
+        console.error(error);
+        return res.status(500).json({
+            error: "Failed in save",
+            details: error
+        });
+    });
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -72,7 +109,7 @@ module.exports.updateAdmin = (req, res) => {
                 });
         })
         .catch((error) => {
-            console.error("Error updating admin:", error);
+            console.error(error);
             return res.status(500).json({
                 error: "Failed in Find",
                 details: error
