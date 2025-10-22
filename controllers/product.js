@@ -31,3 +31,43 @@ module.exports.createProduct = (req, res) => {
 	    });
 }
 
+
+// Get all Products
+module.exports.getAllProduct = (req, res) => {
+
+    if (!req.user.isAdmin) {
+        return res.status(403).send({
+            auth: "Failed",
+            message: "Action Forbidden"
+        });
+    }
+
+    return Product.find({})
+        .then(result => {
+            return res.status(200).send(result);
+        })
+        .catch(error => errorHandler(error, req, res));
+};
+
+//Get all active product
+module.exports.getAllActive = (req, res) => {
+
+    return Product.find({ isActive: true })
+        .then(result => {
+            return res.status(200).send(result); 
+        })
+        .catch(error => errorHandler(error, req, res));
+};
+
+//Get Product 
+module.exports.getProduct =(req, res) => {
+    Product.findById(req.params.productId)
+    .tehn(product => {
+        if(product) {
+            return res.status(200).send(product);
+        } else if {
+            return res.status(404).send({ error: 'Product not found'})
+        }
+    })
+    .catch(err => err);
+};
