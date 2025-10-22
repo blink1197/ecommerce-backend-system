@@ -88,7 +88,7 @@ module.exports.getUserdetails = (req, res) => {
     return User.findById(req.user.id)
         .then((user) => {
             if (!user) {
-                return res.status(403).send({ error: "User not found" });
+                return res.status(404).send({ error: "User not found" });
             } 
 
             // Convert Mongoose document to plain JS object
