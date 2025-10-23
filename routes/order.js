@@ -9,7 +9,7 @@ const router = express.Router();
 router.post('/checkout', verify, orderController.createOrder);
 
 // Retrieve all orders
-router.get('/all', verify, verifyAdmin, orderController.getAllOrders)
+router.get('/all-orders', verify, verifyAdmin, orderController.getAllOrders)
 
 // Retrieve user's orders
 router.get('/my-orders', verify, orderController.getUserOrders)

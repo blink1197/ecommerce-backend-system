@@ -11,7 +11,7 @@ module.exports.createOrder = (req, res) => {
 			}
 
 			if (cart.cartItems.length === 0) {
-				return res.status(400).json({ message: "Cart is empty" });
+				return res.status(400).json({ error: "No items to Checkout" });
 			}
 
 			// Compute total price 
@@ -29,7 +29,7 @@ module.exports.createOrder = (req, res) => {
 
 			return newOrder.save().then((order) => {
 				return res.status(200).json({
-					message:"Order created successfully",
+					message:"Ordered Successfully",
 					order,
 				});
 			});
