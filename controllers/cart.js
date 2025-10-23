@@ -148,7 +148,7 @@ module.exports.updateCartQuantity = (req, res) => {
 
 module.exports.removeFromCart = (req, res)=> {
 	const productId = req.params.productId;
-	const { id: userId } = req.user;
+	const userId = req.user.id;
 
 	Product.findById(productId)
 		.then((product) => {
