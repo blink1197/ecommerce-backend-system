@@ -23,25 +23,33 @@ module.exports.registerUser = (req, res) => {
         return res.status(400).send({ error: 'Password must be atleast 8 characters long' });
     } 
 
-    let newUser = new User({
-        firstName : firstName,
-        lastName : lastName,
-        email : email,
-        mobileNo : mobileNo,
-        password : bcrypt.hashSync(password, 10)
-    })
+    return User.findOne({ email: email })
+        .then((existingUser) => {
+            if (existingUser) {
+                return res.status(409).json({ error: 'Email already registered' }); // 409 Conflict
+            }
 
-    return newUser.save()
-    .then((user) => res.status(201).send({
-        message: 'Registered Successfully',
-    }))
-    .catch((error) => {
-        console.error(error);
-        return res.status(500).json({
-            error: "Failed in save",
-            details: error
+            // ✅ Create new user
+            const newUser = new User({
+                firstName,
+                lastName,
+                email,
+                mobileNo,
+                password: bcrypt.hashSync(password, 10)
+            });
+
+            return newUser.save()
+                .then(() => {
+                    return res.status(201).send({ message: 'Registered Successfully' });
+                });
+        })
+        .catch((error) => {
+            console.error(error);
+            return res.status(500).json({
+                error: "Failed to register user",
+                details: error.message
+            });
         });
-    });
 };
 
 
@@ -150,24 +158,40 @@ module.exports.updateAdmin = (req, res) => {
 
 // Update password
 module.exports.updatePassword = (req, res) => {
-    const { newPassword } = req.body;
+    const { currentPassword, newPassword } = req.body;
     const userId = req.user.id;
 
-    return User.findByIdAndUpdate(userId, { password: bcrypt.hashSync(newPassword, 10)})
-    	.then((user) => {
-    		if (!user) {
-                return res.status(404).json({
-                    error: "User not found"
-                });
+    if (!currentPassword || !newPassword) {
+        return res.status(400).json({ error: "Current and new passwords are required" });
+    }
+
+    if (newPassword.length < 8) {
+        return res.status(400).json({ error: "New password must be at least 8 characters long" });
+    }
+
+    User.findById(userId)
+        .then((user) => {
+            if (!user) {
+                return res.status(404).json({ error: "User not found" });
             }
 
-            return res.status(200).send({ message: "Password reset successfully" });
-    	})
-    	.catch((error) => {
+            // ✅ Check if current password matches
+            const isMatch = bcrypt.compareSync(currentPassword, user.password);
+            if (!isMatch) {
+                return res.status(401).json({ error: "Current password is incorrect" });
+            }
+
+            // ✅ Update password if match
+            user.password = bcrypt.hashSync(newPassword, 10);
+
+            return user.save()
+                .then(() => res.status(200).json({ message: "Password updated successfully" }));
+        })
+        .catch((error) => {
             console.error(error);
             return res.status(500).json({
-                error: "Failed in Find",
-                details: error
+                error: "Failed to update password",
+                details: error.message
             });
         });
 };
