@@ -35,6 +35,9 @@
 - Get Cart
 - Add to Cart 
 - Get Cart Quantity
+- Remove item from Cart
+- Clear Cart
+
 
 
 
