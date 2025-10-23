@@ -175,13 +175,13 @@ module.exports.updatePassword = (req, res) => {
                 return res.status(404).json({ error: "User not found" });
             }
 
-            // ✅ Check if current password matches
+            // Check if current password matches
             const isMatch = bcrypt.compareSync(currentPassword, user.password);
             if (!isMatch) {
                 return res.status(401).json({ error: "Current password is incorrect" });
             }
 
-            // ✅ Update password if match
+            // Update password if match
             user.password = bcrypt.hashSync(newPassword, 10);
 
             return user.save()
