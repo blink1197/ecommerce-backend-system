@@ -38,6 +38,10 @@
 - Remove item from Cart
 - Clear Cart
 
+##### Order Resources:
+- Create Order
+- Retrieve all Orders
+- Retrieve User's Orders
 
 
 
