@@ -141,3 +141,43 @@ module.exports.updateCartQuantity = (req, res) => {
 			});
 		});
 };
+
+//Clear Cart
+module.exports.removeFromCart = (req, res) => {
+  const userId = req.user.id;
+
+  Cart.findOne({ userId: userId })
+    .then(cart => {
+
+      if (!cart) {
+        return res.status(404).send({
+          message: "No cart found for this user."
+        });
+      }
+
+      if (!cart.cartItems || cart.cartItems.length === 0) {
+        return res.status(400).send({
+          message: "Cart is already empty."
+        });
+      }
+
+      cart.cartItems = [];
+      cart.totalPrice = 0;
+
+      cart.save()
+        .then(updatedCart => {
+          return res.status(200).send({
+            message: "Cart cleared successfully",
+            cart: updatedCart
+          });
+        })
+
+        .catch(error => {
+          return res.status(500).send(error);
+        })
+    })
+
+    .catch(error => {
+      return res.status(500).send(error);
+    });
+};
