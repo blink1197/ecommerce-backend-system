@@ -95,21 +95,24 @@ module.exports.updateCartQuantity = (req, res) => {
 
 	Product.findById(productId)
 		.then((product) => {
-			if (!product)
+			if (!product) {
 				return res.status(404).json({ message: "Product not found" });
+			}
 
 			const productPrice = product.price;
 
 			return Cart.findOne({ userId }).then((cart) => {
-				if (!cart)
+				if (!cart) {
 					return res.status(404).json({ message: "No cart found" });
+				}
 
 				const itemIndex = cart.cartItems.findIndex(
 					(i) => i.productId.toString() === productId.toString()
 				);
 
-				if (itemIndex === -1)
+				if (itemIndex === -1) {
 					return res.status(404).json({ message: "Item not found in the cart" });
+				}
 
 				// Update quantity & subtotal
 				const item = cart.cartItems[itemIndex];
@@ -141,3 +144,53 @@ module.exports.updateCartQuantity = (req, res) => {
 			});
 		});
 };
+
+
+module.exports.removeFromCart = (req, res)=> {
+	const productId = req.params.productId;
+	const { id: userId } = req.user;
+
+	Product.findById(productId)
+		.then((product) => {
+			if (!product) {
+				return res.status(404).json({ message: "Product not found" });
+			}
+
+			return Cart.findOne({ userId }).then((cart) => {
+				if (!cart) {
+					return res.status(404).json({ message: "No cart found" });
+				}
+
+				const itemIndex = cart.cartItems.findIndex(
+					(i) => i.productId.toString() === productId.toString()
+				);
+
+				if (itemIndex === -1) {
+					return res.status(404).json({ message: "Item not found in the cart" });
+				}
+
+				// Remove item from the cart
+				cart.cartItems.splice(itemIndex, 1);
+
+				// Recalculate total price
+				cart.totalPrice = cart.cartItems.reduce(
+					(total, i) => total + i.subtotal,
+					0
+				);
+
+				return cart.save().then((updatedCart) => {
+					return res.status(200).json({
+						message: "Item removed from cart successfully",
+						updatedCart
+					});
+				});
+			})
+		})
+		.catch((error) => {
+			console.error(error);
+			return res.status(500).json({
+				error: "Server error while removing item from cart",
+				details: error.message,
+			});
+		});
+}

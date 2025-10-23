@@ -14,4 +14,7 @@ router.post('/add-to-cart', verify, cartController.addToCart);
 // Update cart quantity
 router.patch('/update-cart-quantity', verify, cartController.updateCartQuantity);
 
+// Remove from cart
+router.patch('/:productId/remove-from-cart', verify, cartController.removeFromCart);
+
 module.exports = router;
