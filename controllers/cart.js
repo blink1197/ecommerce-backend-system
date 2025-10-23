@@ -111,16 +111,12 @@ module.exports.updateCartQuantity = (req, res) => {
 				if (itemIndex === -1)
 					return res.status(404).json({ message: "Item not found in the cart" });
 
-				if (newQuantity <= 0) {
-					cart.cartItems.splice(itemIndex, 1);
-				} else {
-					// Otherwise update quantity & subtotal
-					const item = cart.cartItems[itemIndex];
-					item.quantity = newQuantity;
-					item.subtotal = productPrice * newQuantity;
-				}
+				// Update quantity & subtotal
+				const item = cart.cartItems[itemIndex];
+				item.quantity = newQuantity;
+				item.subtotal = productPrice * newQuantity;
 
-				// 🔁 Recalculate total price
+				// Recalculate total price
 				cart.totalPrice = cart.cartItems.reduce(
 					(total, i) => total + i.subtotal,
 					0
