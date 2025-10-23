@@ -41,3 +41,9 @@
 
 
 
+
+### Appendices:
+#### Entity Relationship Diagram (ERD)
+- [ERD (draw.io)](https://drive.google.com/file/d/1kx-JLStiKWyN0SWp2JCUezvPKSmst0Oc/view?usp=sharing)
+
+
