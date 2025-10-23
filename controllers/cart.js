@@ -1,4 +1,5 @@
 const Cart = require('../models/Cart');
+const Product = require('../models/Product');
 
 
 module.exports.getCart = (req, res) => {
@@ -22,66 +23,121 @@ module.exports.getCart = (req, res) => {
 }
 
 module.exports.addToCart = (req, res) => {
-	try {
-		const { productId, quantity, price, subtotal } = req.body;
-		const { id: userId, isAdmin } = req.user;
+	const { productId, quantity, price, subtotal } = req.body;
+	const { id: userId, isAdmin } = req.user;
 
-		if (isAdmin) return res.status(403).send({ error: "Admin not allowed" });
+	if (isAdmin) return res.status(403).send({ error: "Admin not allowed" });
 
-		return Cart.findOne({ userId })
-			.then((cart) => {
-				// If no cart yet
-				if (!cart) {
-					const newCart = new Cart({
-						userId,
-						cartItems: [{ productId, quantity, subtotal }],
-						totalPrice: subtotal,
+	return Cart.findOne({ userId })
+		.then((cart) => {
+			// If no cart yet
+			if (!cart) {
+				const newCart = new Cart({
+					userId,
+					cartItems: [{ productId, quantity, subtotal }],
+					totalPrice: subtotal,
+				});
+				return newCart.save()
+					.then((newCart) => {
+						return res.status(201).send({
+							message: "Item added to cart successfully",
+							updatedCart: newCart,
+						});
+					})
+			}
+
+			// If cart exists
+			const productExists = cart.cartItems.some(
+				(item) => item.productId.toString() === productId.toString()
+			);
+
+			if (productExists) {
+				cart.cartItems = cart.cartItems.map((item) => {
+					if (item.productId.toString() === productId.toString()) {
+						item.quantity += quantity;
+						item.subtotal += subtotal;
+					}
+					return item;
+				});
+			} else {
+				cart.cartItems.push({ productId, quantity, subtotal });
+			}
+
+			cart.totalPrice = cart.cartItems.reduce(
+				(total, item) => total + item.subtotal,
+				0
+			);
+
+			return cart.save()
+				.then((newCart) => {
+					return res.status(200).send({
+						message: productExists ? "Item quantity updated successfully" : "Item added to cart successfully",
+						updatedCart: cart,
 					});
-					return newCart.save()
-						.then((newCart) => {
-							return res.status(201).send({
-								message: "Item added to cart successfully",
-								updatedCart: newCart,
-							});
-						})
-				}
+				})
+		})
+		.catch((error) => {
+            console.error(error);
+            return res.status(500).json({
+                error: "Failed in Find",
+                details: error
+            });
+        });
+		
+};
 
-				// If cart exists
-				const productExists = cart.cartItems.some(
-					(item) => item.productId.toString() === productId.toString()
+
+module.exports.updateCartQuantity = (req, res) => {
+	const { productId, newQuantity } = req.body;
+	const { id: userId, isAdmin } = req.user;
+
+	if (isAdmin) return res.status(403).json({ error: "Admin not allowed" });
+
+	Product.findById(productId)
+		.then((product) => {
+			if (!product)
+				return res.status(404).json({ message: "Product not found" });
+
+			const productPrice = product.price;
+
+			return Cart.findOne({ userId }).then((cart) => {
+				if (!cart)
+					return res.status(404).json({ message: "No cart found" });
+
+				const itemIndex = cart.cartItems.findIndex(
+					(i) => i.productId.toString() === productId.toString()
 				);
 
-				if (productExists) {
-					cart.cartItems = cart.cartItems.map((item) => {
-						if (item.productId.toString() === productId.toString()) {
-							item.quantity += quantity;
-							item.subtotal += subtotal;
-						}
-						return item;
-					});
-				} else {
-					cart.cartItems.push({ productId, quantity, subtotal });
-				}
+				if (itemIndex === -1)
+					return res.status(404).json({ message: "Item not found in the cart" });
 
+				// Update quantity & subtotal
+				const item = cart.cartItems[itemIndex];
+				item.quantity = newQuantity;
+				item.subtotal = productPrice * newQuantity;
+
+				// Recalculate total price
 				cart.totalPrice = cart.cartItems.reduce(
-					(total, item) => total + item.subtotal,
+					(total, i) => total + i.subtotal,
 					0
 				);
 
-				return cart.save()
-					.then((newCart) => {
-						return res.status(200).send({
-							message: productExists ? "Item quantity updated successfully" : "Item added to cart successfully",
-							updatedCart: cart,
-						});
-					})
-			})
-		
-	} catch (error) {
-		console.error("Error adding to cart:", error);
-		return res.status(500).send({
-			error: "Server error while adding to cart",
-			details: error.message,
+				return cart.save().then((updatedCart) => {
+					return res.status(200).json({
+						message:
+							newQuantity <= 0
+								? "Item removed from cart successfully"
+								: "Item quantity updated successfully",
+						updatedCart,
+					});
+				});
+			});
+		})
+		.catch((error) => {
+			console.error("Error updating cart quantity:", error);
+			return res.status(500).json({
+				error: "Server error while updating cart quantity",
+				details: error.message,
+			});
 		});
-	}
 };
