@@ -28,3 +28,13 @@
 - Update Product
 - Archive Product
 - Activate Product
+- Search Product by Name
+- Search Product by Price
+
+##### Cart Resources:
+- Get Cart
+- Add to Cart 
+- Get Cart Quantity
+
+
+
