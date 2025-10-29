@@ -95,9 +95,9 @@ npm install
 ### 3. Configure Environment Variables
 Create a .env file in the project root and include the following key-value pairs. You can refer to the .env.sample.
 ```bash
-MONGODB_URI=<your_mongodb_connection_string>
-JWT_SECRET=<your_secret_key>
 PORT=4000
+MONGODB_STRING=<your_mongodb_connection_string>
+JWT_SECRET_KEY=<your_secret_key>
 ```
 ### 4. Run the server
 ```bash
