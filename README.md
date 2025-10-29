@@ -101,7 +101,7 @@ JWT_SECRET_KEY=<your_secret_key>
 ```
 ### 4. Run the server
 ```bash
-npm run start
+npm run dev
 ```
 The server should now be running on http://localhost:4000
 
